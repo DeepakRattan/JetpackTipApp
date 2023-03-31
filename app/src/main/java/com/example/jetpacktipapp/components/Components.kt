@@ -1,6 +1,7 @@
 package com.example.jetpacktipapp.components
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -26,13 +27,14 @@ import androidx.compose.ui.unit.sp
 // Customizable Input Field Composable Function
 @Composable
 fun InputField(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     valueState: MutableState<String>, // Any composable function which will call this function here, this composable can react to those values
     label: String,
     enabled: Boolean,
     isSingleLine: Boolean,
     keyboardType: KeyboardType = KeyboardType.Number,
     imeAction: ImeAction = ImeAction.Default,
+    onAction: KeyboardActions = KeyboardActions.Default
 ) {
     OutlinedTextField(
         value = valueState.value,
@@ -48,13 +50,14 @@ fun InputField(
         singleLine = isSingleLine,
         textStyle = TextStyle(
             fontSize = 18.sp,
-            color = MaterialTheme.colors.background
+            color = Color.Black
         ),
         enabled = enabled,
         keyboardOptions = KeyboardOptions(
             keyboardType = keyboardType,
             imeAction = imeAction
         ),
+        keyboardActions = onAction,
         modifier = modifier.padding(all = 10.dp)
     )
 
