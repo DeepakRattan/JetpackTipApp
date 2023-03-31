@@ -1,6 +1,7 @@
 package com.example.jetpacktipapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
@@ -24,10 +25,16 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.jetpacktipapp.MainActivity.Companion.TAG
 import com.example.jetpacktipapp.components.InputField
 import com.example.jetpacktipapp.ui.theme.JetpackTipAppTheme
 
 class MainActivity : ComponentActivity() {
+
+    companion object {
+        const val TAG = "MainActivity"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -59,8 +66,7 @@ fun TopHeader(totalPerPerson: Double = 130.0) {
             .height(150.dp)
             .clip(
                 shape = CircleShape.copy(all = CornerSize(12.dp))
-            ),
-        color = Color(0xFFE9D7f7)
+            ), color = Color(0xFFE9D7f7)
 //            .clip(RoundedCornerShape(corner = CornerSize(12.dp)))
     ) {
         Column(
@@ -72,8 +78,7 @@ fun TopHeader(totalPerPerson: Double = 130.0) {
             val total = "%.2f".format(totalPerPerson)
 
             Text(
-                text = "Total Per Person",
-                style = MaterialTheme.typography.h5
+                text = "Total Per Person", style = MaterialTheme.typography.h5
             )
             Text(
                 text = "$$total",
@@ -89,6 +94,17 @@ fun TopHeader(totalPerPerson: Double = 130.0) {
 @Preview
 @Composable
 fun MainContent() {
+    BillForm() { billAmount ->
+        Log.d(TAG, billAmount)
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun BillForm(
+    modifier: Modifier = Modifier,
+    onValueChange: (String) -> Unit
+) {
     val totalBillState = remember {
         mutableStateOf("")
     }
@@ -109,20 +125,18 @@ fun MainContent() {
         Column(
             modifier = Modifier.padding(all = 5.dp)
         ) {
-            InputField(
-                valueState = totalBillState,
+            InputField(valueState = totalBillState,
                 label = "Enter Bill",
                 enabled = true,
                 isSingleLine = true,
                 onAction = KeyboardActions {
                     if (!validState) return@KeyboardActions
-                    //TODO : onValueChange
+                    onValueChange(totalBillState.value.trim())
+
+                    // Hide the keyboard
                     keyboardController?.hide()
-
-                }
-            )
+                })
         }
-
     }
 }
 
