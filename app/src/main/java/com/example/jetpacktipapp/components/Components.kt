@@ -1,5 +1,6 @@
 package com.example.jetpacktipapp.components
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -58,7 +59,9 @@ fun InputField(
             imeAction = imeAction
         ),
         keyboardActions = onAction,
-        modifier = modifier.padding(all = 10.dp)
+        modifier = modifier
+            .padding(all = 10.dp)
+            .fillMaxWidth()
     )
 
 }
