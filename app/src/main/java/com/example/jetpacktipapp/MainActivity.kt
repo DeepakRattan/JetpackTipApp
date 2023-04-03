@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Slider
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -45,7 +46,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MyApp {
-                TopHeader()
+                MainContent()
             }
         }
     }
@@ -70,6 +71,7 @@ fun TopHeader(totalPerPerson: Double = 130.0) {
         modifier = Modifier
             .fillMaxWidth()
             .height(150.dp)
+            .padding(all = 15.dp)
             .clip(
                 shape = CircleShape.copy(all = CornerSize(12.dp))
             ), color = Color(0xFFE9D7f7)
@@ -100,9 +102,12 @@ fun TopHeader(totalPerPerson: Double = 130.0) {
 @Preview
 @Composable
 fun MainContent() {
-    BillForm() { billAmount ->
-        Log.d(TAG, billAmount)
+    Column(modifier = Modifier.padding(all = 12.dp)) {
+        BillForm() { billAmount ->
+            Log.d(TAG, billAmount)
+        }
     }
+
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -122,7 +127,17 @@ fun BillForm(
         mutableStateOf(0)
     }
 
+    val sliderPositionState = remember {
+        mutableStateOf(0f)
+    }
+
+    val tipPercentage = (sliderPositionState.value * 100).toInt()
+
+    val range = IntRange(start = 1, endInclusive = 100)
+
     val keyboardController = LocalSoftwareKeyboardController.current
+    // Top Header
+    TopHeader()
 
     Surface(
         modifier = Modifier
@@ -147,48 +162,79 @@ fun BillForm(
                     // Hide the keyboard
                     keyboardController?.hide()
                 })
-            if (validState) {
+            /* if (validState) {*/
+            Row(
+                modifier = Modifier.padding(3.dp), horizontalArrangement = Arrangement.Start
+            ) {
+                Text(
+                    text = "Split",
+                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                )
+                Spacer(modifier = Modifier.width(120.dp))
                 Row(
-                    modifier = Modifier.padding(3.dp), horizontalArrangement = Arrangement.Start
+                    modifier = Modifier.padding(3.dp),
+                    horizontalArrangement = Arrangement.End
                 ) {
-                    Text(
-                        text = "Split",
-                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    RoundIconButton(imageVector = Icons.Default.Remove,
+                        onClick = {
+                            Log.d(TAG, "BillForm: Remove clicked")
+                            if (splitCount.value != 0)
+                                splitCount.value = splitCount.value - 1
+                        }
                     )
-                    Spacer(modifier = Modifier.width(120.dp))
-                    Row(
-                        modifier = Modifier.padding(3.dp),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        RoundIconButton(imageVector = Icons.Default.Remove,
-                            onClick = {
-                                Log.d(TAG, "BillForm: Remove clicked")
-                                if (splitCount.value != 0)
-                                    splitCount.value = splitCount.value - 1
-                            }
-                        )
-
-                        Text(
-                            text = splitCount.value.toString(),
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically)
-                                .padding(start = 9.dp, end = 9.dp)
-
-
-                        )
-                        RoundIconButton(imageVector = Icons.Default.Add,
-                            onClick = {
-                                Log.d(TAG, "BillForm: Add Clicked")
+                    Text(
+                        text = splitCount.value.toString(),
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(start = 9.dp, end = 9.dp)
+                    )
+                    RoundIconButton(imageVector = Icons.Default.Add,
+                        onClick = {
+                            Log.d(TAG, "BillForm: Add Clicked")
+                            if (splitCount.value < range.last)
                                 splitCount.value = splitCount.value + 1
-                            }
-                        )
-                    }
-                }
-            } else {
-                Box() {
-
+                        }
+                    )
                 }
             }
+            /* } else {
+                 Box() {
+ 
+                 }
+             }*/
+
+            Row() {
+                Text(
+                    text = "Tip",
+                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                )
+                Spacer(modifier = Modifier.width(200.dp))
+                Text(
+                    text = "$33",
+                    modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                )
+            }
+
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "$tipPercentage%")
+                Spacer(modifier = Modifier.height(14.dp))
+                // Slider
+                Slider(
+                    modifier = Modifier.padding(start = 10.dp, end = 10.dp),
+                    value = sliderPositionState.value,
+                    steps = 5,
+                    onValueChange = { newSliderState ->
+                        sliderPositionState.value = newSliderState
+                    },
+                    onValueChangeFinished = {
+                        Log.d(TAG, "BillForm: End of slider")
+                    }
+                )
+            }
+
         }
     }
 }
@@ -198,7 +244,8 @@ fun BillForm(
 fun DefaultPreview() {
     JetpackTipAppTheme {
         MyApp {
-            TopHeader()
+            // TopHeader()
+//            MainContent()
         }
     }
 }
