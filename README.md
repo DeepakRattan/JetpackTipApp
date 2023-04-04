@@ -1,2 +1,2 @@
 # JetpackTipApp
-Demonstration of Tip App using JetPack Compose
+Demonstration of Tip Calculator App using JetPack Compose
