@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.example.jetpacktipapp.MainActivity.Companion.TAG
 import com.example.jetpacktipapp.components.InputField
 import com.example.jetpacktipapp.ui.theme.JetpackTipAppTheme
+import com.example.jetpacktipapp.util.calculateTotalTip
 import com.example.jetpacktipapp.widgets.RoundIconButton
 
 class MainActivity : ComponentActivity() {
@@ -131,6 +132,10 @@ fun BillForm(
         mutableStateOf(0f)
     }
 
+    val tipAmountState = remember {
+        mutableStateOf(0.0)
+    }
+
     val tipPercentage = (sliderPositionState.value * 100).toInt()
 
     val range = IntRange(start = 1, endInclusive = 100)
@@ -210,7 +215,7 @@ fun BillForm(
                 )
                 Spacer(modifier = Modifier.width(200.dp))
                 Text(
-                    text = "$33",
+                    text = "$ ${tipAmountState.value}",
                     modifier = Modifier.align(alignment = Alignment.CenterVertically)
                 )
             }
@@ -228,6 +233,9 @@ fun BillForm(
                     steps = 5,
                     onValueChange = { newSliderState ->
                         sliderPositionState.value = newSliderState
+
+                        tipAmountState.value =
+                            calculateTotalTip(totalBillState.value.toDouble(), tipPercentage)
                     },
                     onValueChangeFinished = {
                         Log.d(TAG, "BillForm: End of slider")
@@ -238,6 +246,8 @@ fun BillForm(
         }
     }
 }
+
+
 
 @Preview(showBackground = true)
 @Composable
