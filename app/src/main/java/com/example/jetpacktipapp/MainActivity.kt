@@ -2,11 +2,9 @@ package com.example.jetpacktipapp
 
 import android.os.Bundle
 import android.util.Log
-import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
@@ -34,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.example.jetpacktipapp.MainActivity.Companion.TAG
 import com.example.jetpacktipapp.components.InputField
 import com.example.jetpacktipapp.ui.theme.JetpackTipAppTheme
+import com.example.jetpacktipapp.util.calculateTotalPerPerson
 import com.example.jetpacktipapp.util.calculateTotalTip
 import com.example.jetpacktipapp.widgets.RoundIconButton
 
@@ -124,8 +123,8 @@ fun BillForm(
         totalBillState.value.trim().isNotEmpty()
     }
 
-    val splitCount = remember {
-        mutableStateOf(0)
+    val splitByState = remember {
+        mutableStateOf(1)
     }
 
     val sliderPositionState = remember {
@@ -136,13 +135,17 @@ fun BillForm(
         mutableStateOf(0.0)
     }
 
+    val totalPerPersonState = remember {
+        mutableStateOf(0.0)
+    }
+
     val tipPercentage = (sliderPositionState.value * 100).toInt()
 
     val range = IntRange(start = 1, endInclusive = 100)
 
     val keyboardController = LocalSoftwareKeyboardController.current
     // Top Header
-    TopHeader()
+    TopHeader(totalPerPerson = totalPerPersonState.value)
 
     Surface(
         modifier = Modifier
@@ -183,12 +186,19 @@ fun BillForm(
                     RoundIconButton(imageVector = Icons.Default.Remove,
                         onClick = {
                             Log.d(TAG, "BillForm: Remove clicked")
-                            if (splitCount.value != 0)
-                                splitCount.value = splitCount.value - 1
+                            if (splitByState.value > 1)
+                                splitByState.value = splitByState.value - 1
+                            else 1
+
+                            totalPerPersonState.value = calculateTotalPerPerson(
+                                totalBillState.value.toDouble(),
+                                splitByState.value,
+                                tipPercentage
+                            )
                         }
                     )
                     Text(
-                        text = splitCount.value.toString(),
+                        text = splitByState.value.toString(),
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                             .padding(start = 9.dp, end = 9.dp)
@@ -196,8 +206,14 @@ fun BillForm(
                     RoundIconButton(imageVector = Icons.Default.Add,
                         onClick = {
                             Log.d(TAG, "BillForm: Add Clicked")
-                            if (splitCount.value < range.last)
-                                splitCount.value = splitCount.value + 1
+                            if (splitByState.value < range.last)
+                                splitByState.value = splitByState.value + 1
+
+                            totalPerPersonState.value = calculateTotalPerPerson(
+                                totalBillState.value.toDouble(),
+                                splitByState.value,
+                                tipPercentage
+                            )
                         }
                     )
                 }
@@ -236,6 +252,12 @@ fun BillForm(
 
                         tipAmountState.value =
                             calculateTotalTip(totalBillState.value.toDouble(), tipPercentage)
+
+                        totalPerPersonState.value = calculateTotalPerPerson(
+                            totalBillState.value.toDouble(),
+                            splitByState.value,
+                            tipPercentage
+                        )
                     },
                     onValueChangeFinished = {
                         Log.d(TAG, "BillForm: End of slider")
@@ -246,7 +268,6 @@ fun BillForm(
         }
     }
 }
-
 
 
 @Preview(showBackground = true)
