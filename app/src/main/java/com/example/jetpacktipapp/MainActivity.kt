@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -102,34 +103,10 @@ fun TopHeader(totalPerPerson: Double = 130.0) {
 @Preview
 @Composable
 fun MainContent() {
-    Column(modifier = Modifier.padding(all = 12.dp)) {
-        BillForm() { billAmount ->
-            Log.d(TAG, billAmount)
-        }
-    }
-
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun BillForm(
-    modifier: Modifier = Modifier, onValueChange: (String) -> Unit
-) {
-    val totalBillState = remember {
-        mutableStateOf("")
-    }
-
-    val validState = remember(totalBillState.value) {
-        totalBillState.value.trim().isNotEmpty()
-    }
-
     val splitByState = remember {
         mutableStateOf(1)
     }
 
-    val sliderPositionState = remember {
-        mutableStateOf(0f)
-    }
 
     val tipAmountState = remember {
         mutableStateOf(0.0)
@@ -138,17 +115,50 @@ fun BillForm(
     val totalPerPersonState = remember {
         mutableStateOf(0.0)
     }
+    //val range = IntRange(start = 1, endInclusive = 100)
+
+    Column(modifier = Modifier.padding(all = 12.dp)) {
+        BillForm(
+            splitByState = splitByState,
+            tipAmountState = tipAmountState,
+            totalPerPersonState = totalPerPersonState
+        )
+    }
+
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun BillForm(
+    modifier: Modifier = Modifier,
+    range: IntRange = 1..100,
+    onValueChange: (String) -> Unit = {},
+    splitByState: MutableState<Int>,
+    tipAmountState: MutableState<Double>,
+    totalPerPersonState: MutableState<Double>
+
+) {
+    val totalBillState = remember {
+        mutableStateOf("")
+    }
+
+    val validState = remember(totalBillState.value) {
+        totalBillState.value.trim().isNotEmpty()
+    }
+    val sliderPositionState = remember {
+        mutableStateOf(0f)
+    }
+
 
     val tipPercentage = (sliderPositionState.value * 100).toInt()
 
-    val range = IntRange(start = 1, endInclusive = 100)
 
     val keyboardController = LocalSoftwareKeyboardController.current
     // Top Header
     TopHeader(totalPerPerson = totalPerPersonState.value)
 
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .padding(all = 12.dp)
             .fillMaxWidth(),
         shape = RoundedCornerShape(corner = CornerSize(8.dp)),
